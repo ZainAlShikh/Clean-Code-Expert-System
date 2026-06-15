@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clean Code Expert System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <main class="container">
+        <header class="glass-panel">
+            <h1>Clean Code <span>Expert System</span></h1>
+            <p>Automated JavaScript code analysis & refactoring recommendations</p>
+        </header>
+
+        <section class="input-section glass-panel">
+            <div class="input-group">
+                <input type="text" id="targetPath" placeholder="Enter absolute path to your JS file or project folder..." />
+                <button id="analyzeBtn" class="btn-primary">
+                    <span id="btnText">Analyze Code</span>
+                    <div id="btnLoader" class="loader hidden"></div>
+                </button>
+            </div>
+            <div id="errorMessage" class="error-msg hidden"></div>
+        </section>
+
+        <section id="resultsSection" class="results-section hidden">
+            <div class="results-header glass-panel">
+                <h2>Analysis Results</h2>
+                <p id="scanSummary"></p>
+            </div>
+            
+            <div id="cardsContainer" class="cards-container">
+                <!-- Recommendations will be injected here by JS -->
+            </div>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
