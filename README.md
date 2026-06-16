@@ -1,61 +1,61 @@
-# Clean Code Expert System
+# نظام Clean Code الخبير (Clean Code Expert System)
 
-## Overview
-This project is an intelligent, rule-based expert system designed to automate the analysis of JavaScript source code. It evaluates the codebase against established Clean Code and Refactoring principles (based on the work of Robert C. Martin and Martin Fowler) to detect design flaws, code smells, and structural inefficiencies.
+## نظرة عامة (Overview)
+هذا المشروع عبارة عن نظام خبير (Expert System) ذكي يعتمد على القواعد (Rule-Based)، تم تصميمه لأتمتة عملية تحليل الشيفرة المصدرية (Source Code) المكتوبة بلغة JavaScript. يقوم النظام بتقييم الكود بناءً على مبادئ Clean Code و Refactoring المعتمدة (استناداً إلى أعمال Robert C. Martin و Martin Fowler) لاكتشاف العيوب التصميمية (Design Flaws)، الروائح البرمجية (Code Smells)، وعدم الكفاءة الهيكلية.
 
-## Key Capabilities
-- **Abstract Syntax Tree (AST) Parsing:** Converts raw JavaScript code into a structured AST using `pyjsparser`.
-- **Project-Wide Analysis:** Evaluates multiple interrelated files concurrently, enabling the detection of cross-file issues such as dead code and data clumps.
-- **Inference Engine:** Utilizes the `experta` library to execute forward-chaining rules against the extracted code facts.
-- **Execution Modes:** Supports both a graphical user interface (Web UI) and a Command-Line Interface (CLI) for automated integration.
+## القدرات الأساسية (Key Capabilities)
+- **تحليل شجرة البنية المجردة (AST Parsing):** يقوم بتحويل كود الـ JavaScript الخام إلى شجرة AST مهيكلة باستخدام مكتبة `pyjsparser`.
+- **تحليل شامل للمشروع (Project-Wide Analysis):** يقوم بتقييم ملفات متعددة ومترابطة في نفس الوقت، مما يسمح باكتشاف المشاكل عبر الملفات (Cross-File Issues) مثل الكود الميت (Dead Code) والبيانات المتكررة (Data Clumps).
+- **محرك الاستدلال (Inference Engine):** يستخدم مكتبة `experta` لتنفيذ قواعد التسلسل الأمامي (Forward-Chaining Rules) على الحقائق (Facts) المستخرجة من الكود.
+- **طرق التشغيل (Execution Modes):** يدعم كلاً من واجهة المستخدم الرسومية (Web UI) وواجهة سطر الأوامر (CLI) للتكامل الآلي (Automated Integration).
 
-## Supported Rules
-The knowledge base currently implements the following analysis rules:
-1. **Cyclomatic Complexity:** Identifies functions with excessive branching and control flow complexity (Threshold > 10).
-2. **Control Flow Nesting:** Detects the Arrow Anti-Pattern where conditional or loop statements are nested excessively (Threshold > 3).
-3. **Dead Code Elimination:** Identifies functions that are declared but never invoked across the entire analyzed project.
-4. **Data Clumps:** Detects functions in different files that share identical, lengthy parameter lists, indicating a missing domain concept.
-5. **Magic Numbers:** Flags unexplained numeric literals hardcoded into the source code.
-6. **Method Length:** Detects functions exceeding optimal length constraints (Threshold > 20 lines).
-7. **Parameter Count:** Flags functions with an excessive number of parameters (Threshold > 3).
-8. **Variable Naming:** Identifies uninformative or overly abbreviated variable names.
+## القواعد المدعومة (Supported Rules)
+تُطبق قاعدة المعرفة (Knowledge Base) حالياً قواعد التحليل التالية:
+1. **التعقيد (Cyclomatic Complexity):** يكتشف الدوال التي تحتوي على تفرعات كثيرة وتعقيد في مسار التحكم (Control Flow) (الحد الأقصى > 10).
+2. **التشعب العميق (Control Flow Nesting):** يكتشف الـ Arrow Anti-Pattern حيث تكون الجمل الشرطية (Conditions) أو الحلقات (Loops) متداخلة بشكل مبالغ فيه (الحد الأقصى > 3).
+3. **التخلص من الكود الميت (Dead Code Elimination):** يحدد الدوال التي تم التصريح عنها (Declared) ولكن لم يتم استدعاؤها (Invoked) في أي مكان ضمن كامل المشروع الذي يتم تحليله.
+4. **البيانات المتكررة (Data Clumps):** يكتشف الدوال في ملفات مختلفة التي تتشارك نفس قوائم المعاملات (Parameters) الطويلة والمطابقة، مما يشير إلى وجود مفهوم برمجي مفقود (Missing Domain Concept).
+5. **الأرقام السحرية (Magic Numbers):** ينبه على وجود أرقام صلبة (Hardcoded Numeric Literals) في الشيفرة المصدرية غير مفهومة المعنى.
+6. **طول الدالة (Method Length):** يكتشف الدوال التي تتجاوز قيود الطول المثالي (الحد الأقصى > 20 سطر).
+7. **عدد المعاملات (Parameter Count):** ينبه على الدوال التي تحتوي على عدد كبير جداً من المعاملات (الحد الأقصى > 3).
+8. **تسمية المتغيرات (Variable Naming):** يحدد المتغيرات ذات الأسماء غير المعبرة أو المختصرة بشكل مبالغ فيه.
 
-## Installation
+## التثبيت (Installation)
 
-1. Clone the repository.
-2. Create and activate a Python Virtual Environment.
-3. Install the required dependencies:
+1. قم باستنساخ (Clone) المستودع.
+2. قم بإنشاء وتفعيل بيئة بايثون وهمية (Python Virtual Environment).
+3. قم بتثبيت الاعتماديات المطلوبة (Dependencies):
 ```bash
 pip install -r requirements.txt
 ```
 
-## Usage Instructions
+## تعليمات الاستخدام (Usage Instructions)
 
-### Web Interface
-To launch the graphical user interface:
+### واجهة الويب (Web Interface)
+لتشغيل واجهة المستخدم الرسومية:
 
 ```powershell
-# 1. Bypass Execution Policy if restricted (Windows only)
+# 1. تجاوز سياسة التنفيذ إذا كانت مقيدة (Windows فقط)
 Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
 
-# 2. Activate the virtual environment
+# 2. تفعيل البيئة الوهمية (Virtual Environment)
 .\.venv\Scripts\activate
 
-# 3. Start the application server
+# 3. تشغيل خادم التطبيق (Application Server)
 python app.py
 ```
-Navigate to `http://127.0.0.1:5000` in your web browser. Input the absolute path to your JavaScript project directory to initiate the analysis.
+انتقل إلى `http://127.0.0.1:5000` في متصفح الويب الخاص بك. أدخل المسار المطلق (Absolute Path) لمجلد مشروع JavaScript الخاص بك لبدء التحليل.
 
-### Command-Line Interface (CLI)
-To run the analysis directly from the terminal without the web interface:
+### واجهة سطر الأوامر (CLI)
+لتشغيل التحليل مباشرة من سطر الأوامر (Terminal) بدون واجهة الويب:
 
 ```powershell
 .\.venv\Scripts\python.exe main.py "C:\absolute\path\to\javascript\project"
 ```
 
-## System Architecture
-- `analyzer/`: Responsible for parsing the JavaScript code into an AST and extracting formal logical facts (`FactExtractor`).
-- `core/`: Contains the `experta` KnowledgeEngine, fact definitions, and the rule configurations.
-- `models/`: Defines data structures for the refactoring recommendations.
-- `utils/`: Handles the formatting and generation of the final analysis reports.
-- `app.py` / `main.py`: The entry points for the Web and CLI applications respectively.
+## بنية النظام (System Architecture)
+- `analyzer/`: مسؤول عن تحليل كود الـ JavaScript إلى AST واستخراج الحقائق المنطقية الرسمية (`FactExtractor`).
+- `core/`: يحتوي على محرك المعرفة (`experta` KnowledgeEngine)، تعريفات الحقائق (Facts)، وإعدادات القواعد (Rules).
+- `models/`: يُعرّف هياكل البيانات (Data Structures) لتوصيات إعادة الهيكلة (Refactoring Recommendations).
+- `utils/`: يتعامل مع تنسيق وإنشاء تقارير التحليل النهائية.
+- `app.py` / `main.py`: نقاط الإدخال (Entry Points) لتطبيقات الويب و الـ CLI على التوالي.
