@@ -18,7 +18,12 @@ class CleanCodeRules:
             file_path=file_path,
             line_number=start_line,
             severity=Severity.HIGH,
-            suggestion="Extract Method: Identify smaller logical blocks within the function and extract them into separate helper functions."
+            suggestion="Extract Method: Identify smaller logical blocks within the function and extract them into separate helper functions.",
+            rule_id="R1",
+            condition="IF LineCount > 20",
+            violation_type="Long Method",
+            strategy="Extract Method",
+            status="FIRED"
         ))
 
     @Rule(JSFunctionFact(param_count=MATCH.param_count, name=MATCH.name, start_line=MATCH.start_line, file_path=MATCH.file_path),
@@ -30,8 +35,13 @@ class CleanCodeRules:
             target_name=name,
             file_path=file_path,
             line_number=start_line,
-            severity=Severity.MEDIUM,
-            suggestion="Introduce Parameter Object: Group related parameters into a single object or class."
+            severity=Severity.HIGH, # Changed to HIGH to match image
+            suggestion="Introduce Parameter Object: Group related parameters into a single object or class.",
+            rule_id="R2",
+            condition="IF ParameterCount > 3",
+            violation_type="Too Many Parameters",
+            strategy="Introduce Parameter Object",
+            status="FIRED"
         ))
 
     @Rule(JSVariableFact(name=MATCH.name, start_line=MATCH.start_line, file_path=MATCH.file_path),
@@ -44,7 +54,12 @@ class CleanCodeRules:
             file_path=file_path,
             line_number=start_line,
             severity=Severity.LOW,
-            suggestion="Rename Variable: Give the variable a meaningful and descriptive name that explains its intent."
+            suggestion="Rename Variable: Give the variable a meaningful and descriptive name that explains its intent.",
+            rule_id="R3",
+            condition="IF VariableNameLength < 3",
+            violation_type="Short Variable Name",
+            strategy="Rename Variable",
+            status="FIRED"
         ))
 
     @Rule(JSFunctionFact(name=MATCH.func_name, file_path=MATCH.file_path, start_line=MATCH.start_line),
@@ -58,7 +73,12 @@ class CleanCodeRules:
             file_path=file_path,
             line_number=start_line,
             severity=Severity.MEDIUM,
-            suggestion="Remove Dead Code: If the function is not part of a public API, it should be removed to keep the codebase clean."
+            suggestion="Remove Dead Code: If the function is not part of a public API, it should be removed to keep the codebase clean.",
+            rule_id="R4",
+            condition="IF FunctionDeclared AND NOT FunctionCalled",
+            violation_type="Dead Code",
+            strategy="Remove Dead Code",
+            status="FIRED"
         ))
 
     @Rule(
@@ -75,7 +95,12 @@ class CleanCodeRules:
             file_path=file_path1,
             line_number=start_line1,
             severity=Severity.MEDIUM,
-            suggestion="Extract Class / Introduce Parameter Object: Turn these parameters into an object."
+            suggestion="Extract Class / Introduce Parameter Object: Turn these parameters into an object.",
+            rule_id="R5",
+            condition="IF SameParameters >= 3 in Multiple Functions",
+            violation_type="Data Clumps",
+            strategy="Extract Class / Introduce Parameter Object",
+            status="FIRED"
         ))
 
     @Rule(JSFunctionFact(complexity=MATCH.complexity, name=MATCH.name, start_line=MATCH.start_line, file_path=MATCH.file_path),
@@ -88,7 +113,12 @@ class CleanCodeRules:
             file_path=file_path,
             line_number=start_line,
             severity=Severity.HIGH,
-            suggestion="Extract Method: Break down the complex logic into smaller, single-purpose functions."
+            suggestion="Extract Method: Break down the complex logic into smaller, single-purpose functions.",
+            rule_id="R6",
+            condition="IF CyclomaticComplexity > 10",
+            violation_type="High Cyclomatic Complexity",
+            strategy="Extract Method",
+            status="FIRED"
         ))
 
     @Rule(JSFunctionFact(nesting_depth=MATCH.nesting_depth, name=MATCH.name, start_line=MATCH.start_line, file_path=MATCH.file_path),
@@ -100,8 +130,13 @@ class CleanCodeRules:
             target_name=name,
             file_path=file_path,
             line_number=start_line,
-            severity=Severity.MEDIUM,
-            suggestion="Extract Method / Guard Clauses: Return early to avoid deep nesting, or extract the nested logic into a separate function."
+            severity=Severity.HIGH, # Changed to HIGH to match image
+            suggestion="Extract Method / Guard Clauses: Return early to avoid deep nesting, or extract the nested logic into a separate function.",
+            rule_id="R7",
+            condition="IF NestingDepth > 3",
+            violation_type="Deep Nesting",
+            strategy="Guard Clauses",
+            status="FIRED"
         ))
 
     @Rule(JSMagicNumberFact(value=MATCH.value, file_path=MATCH.file_path, start_line=MATCH.start_line))
@@ -113,5 +148,29 @@ class CleanCodeRules:
             file_path=file_path,
             line_number=start_line,
             severity=Severity.LOW,
-            suggestion="Replace Magic Number with Symbolic Constant: Assign the number to a well-named constant variable."
+            suggestion="Replace Magic Number with Symbolic Constant: Assign the number to a well-named constant variable.",
+            rule_id="R8",
+            condition="IF UnexplainedNumericLiteral Found",
+            violation_type="Magic Number",
+            strategy="Replace Magic Number with Constant",
+            status="FIRED"
+        ))
+
+    @Rule(JSFunctionFact(name=MATCH.name, concern_count=MATCH.cc, file_path=MATCH.file_path, start_line=MATCH.start_line, concerns_list=MATCH.cl),
+          TEST(lambda cc: cc > 2))
+    def multiple_responsibilities_rule(self, name, cc, file_path, start_line, cl):
+        concerns_str = ", ".join(cl)
+        self.recommendations.append(RefactoringRecommendation(
+            rule_name="Multiple Responsibilities",
+            description=f"Function '{name}' handles {cc} different concerns ({concerns_str}).",
+            target_name=name,
+            file_path=file_path,
+            line_number=start_line,
+            severity=Severity.MEDIUM,
+            suggestion="Extract Method & Apply Single Responsibility Principle",
+            rule_id="R9",
+            condition="IF Multiple Concerns (>2 types)",
+            violation_type="Multiple Responsibilities",
+            strategy="Extract Method",
+            status="FIRED"
         ))

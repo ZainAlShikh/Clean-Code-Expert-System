@@ -17,6 +17,8 @@ class JSFunctionFact(Fact):
     start_line = Field(int, mandatory=True)
     complexity = Field(int, default=1)  # Cyclomatic Complexity
     nesting_depth = Field(int, default=0) # Deep Nesting
+    concern_count = Field(int, default=0) # Number of detected concerns/responsibilities
+    concerns_list = Field(tuple, default=tuple()) # List of detected concern types
 
 
 class JSFunctionCallFact(Fact):
@@ -57,3 +59,4 @@ class JSIfStatementFact(Fact):
     logical_operators_count = Field(int, mandatory=True)
     file_path = Field(str, mandatory=True)
     start_line = Field(int, mandatory=True)
+

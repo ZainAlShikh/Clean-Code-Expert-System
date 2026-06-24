@@ -22,6 +22,11 @@ class RefactoringRecommendation:
     line_number: Optional[int] = None
     severity: Severity = Severity.MEDIUM
     suggestion: str = ""
+    rule_id: str = ""              # e.g., "R1", "R2"
+    condition: str = ""            # e.g., "IF ParameterCount > 3"
+    violation_type: str = ""       # e.g., "Too Many Parameters"
+    strategy: str = ""             # e.g., "Introduce Parameter Object"
+    status: str = "FIRED"          # Rule execution status
 
     def to_dict(self):
         return {
@@ -31,5 +36,10 @@ class RefactoringRecommendation:
             "file_path": self.file_path,
             "line_number": self.line_number,
             "severity": self.severity.value,
-            "suggestion": self.suggestion
+            "suggestion": self.suggestion,
+            "rule_id": self.rule_id,
+            "condition": self.condition,
+            "violation_type": self.violation_type,
+            "strategy": self.strategy,
+            "status": self.status
         }
