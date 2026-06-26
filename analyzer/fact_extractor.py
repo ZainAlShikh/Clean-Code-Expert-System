@@ -1,4 +1,4 @@
-from core.facts import JSFunctionFact, JSVariableFact, JSIfStatementFact, JSFunctionCallFact, JSMagicNumberFact
+from core.facts import JSFunctionFact, JSVariableFact, JSIfStatementFact, JSFunctionCallFact, JSMagicNumberFact, JSConcernFact
 
 class FactExtractor:
     """
@@ -8,6 +8,7 @@ class FactExtractor:
     def __init__(self):
         self.facts = []
         self.current_file_path = ""
+        self.function_stack = []
 
     def extract(self, ast, file_path: str) -> list:
         """
@@ -30,8 +31,13 @@ class FactExtractor:
         if node_type in ("BlockStatement", "IfStatement", "ForStatement", "WhileStatement", "DoWhileStatement", "SwitchStatement"):
             child_depth += 1
 
-        if node_type in ("FunctionDeclaration", "FunctionExpression", "ArrowFunctionExpression"):
-            self._handle_function(node)
+        is_func = node_type in ("FunctionDeclaration", "FunctionExpression", "ArrowFunctionExpression")
+        if is_func:
+            name = "anonymous"
+            if node.get("id"):
+                name = node["id"].get("name", "anonymous")
+            self.function_stack.append(name)
+            self._handle_function(node, name)
             child_depth = 0 # reset depth inside function body for nesting calculation
 
         elif node_type == "VariableDeclaration":
@@ -57,11 +63,10 @@ class FactExtractor:
             elif isinstance(value, dict):
                 self._traverse(value, current_depth=child_depth)
 
-    def _handle_function(self, node):
-        name = "anonymous"
-        if node.get("id"):
-            name = node["id"].get("name", "anonymous")
-            
+        if is_func:
+            self.function_stack.pop()
+
+    def _handle_function(self, node, name):
         start_line = 0
         line_count = 0
         if "loc" in node:
@@ -140,6 +145,28 @@ class FactExtractor:
                 file_path=self.current_file_path,
                 start_line=start_line
             ))
+            
+            if self.function_stack:
+                current_func = self.function_stack[-1]
+                concern = None
+                tn_lower = target_name.lower()
+                
+                # Check for concerns
+                if "validat" in tn_lower: concern = "Validation"
+                elif "save" in tn_lower or "db" in tn_lower or "query" in tn_lower or "persist" in tn_lower: concern = "Database"
+                elif "email" in tn_lower or "send" in tn_lower or "notify" in tn_lower: concern = "Email"
+                elif "report" in tn_lower or "export" in tn_lower: concern = "Reporting"
+                elif "dash" in tn_lower or "update_dash" in tn_lower: concern = "Dashboard"
+                elif "archiv" in tn_lower: concern = "Archiving"
+                elif "audit" in tn_lower or "log" in tn_lower: concern = "Audit"
+                
+                if concern:
+                    # Append concern fact
+                    self.facts.append(JSConcernFact(
+                        func_name=current_func,
+                        file_path=self.current_file_path,
+                        concern=concern
+                    ))
 
     def _handle_literal(self, node):
         val = node.get("value")

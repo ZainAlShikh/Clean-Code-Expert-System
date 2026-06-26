@@ -18,6 +18,13 @@ class JSFunctionFact(Fact):
     complexity = Field(int, default=1)  # Cyclomatic Complexity
     nesting_depth = Field(int, default=0) # Deep Nesting
 
+class JSConcernFact(Fact):
+    """
+    Fact representing a concern or responsibility detected within a function.
+    """
+    func_name = Field(str, mandatory=True)
+    file_path = Field(str, mandatory=True)
+    concern = Field(str, mandatory=True)
 
 class JSFunctionCallFact(Fact):
     """
