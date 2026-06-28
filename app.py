@@ -38,11 +38,14 @@ def analyze():
     
     primary_source_code = ""
     primary_ast = None
+    total_project_lines = 0
 
     for idx, file_path in enumerate(js_files):
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 source_code = f.read()
+            
+            total_project_lines += len(source_code.splitlines())
             
             if idx == 0:
                 primary_source_code = source_code
@@ -62,7 +65,7 @@ def analyze():
     recommendations = engine.analyze(all_facts)
 
     # Calculate Clean Code Score
-    score = CleanCodeScorer.calculate_score(recommendations)
+    score = CleanCodeScorer.calculate_score(recommendations, total_project_lines)
     
     # Get Extracted Facts Summary
     extracted_facts = extractor.get_extracted_facts_summary()
@@ -105,13 +108,14 @@ def re_analyze():
         return jsonify({"error": "No refactored code provided."}), 400
 
     try:
+        total_lines = len(refactored_code.splitlines())
         ast = JavaScriptParser.parse(refactored_code)
         extractor = FactExtractor()
         facts = extractor.extract(ast, "refactored_code.js")
         
         engine = CleanCodeExpertSystem()
         recommendations = engine.analyze(facts)
-        score = CleanCodeScorer.calculate_score(recommendations)
+        score = CleanCodeScorer.calculate_score(recommendations, total_lines)
         extracted_facts = extractor.get_extracted_facts_summary()
         radar_data = _build_radar_data(extracted_facts, recommendations)
         
