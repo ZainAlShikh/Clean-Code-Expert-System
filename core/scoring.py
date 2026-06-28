@@ -26,8 +26,8 @@ class CleanCodeScorer:
             deduction = CleanCodeScorer.SEVERITY_WEIGHTS.get(severity_value, 5)
             total_penalty += deduction
             
-        # Exponential Decay: 100 * (0.95 ^ total_penalty)
-        # Every penalty point reduces the CURRENT score by 5%.
-        score = 100 * (0.95 ** total_penalty)
+        # Exponential Decay: 100 * (0.98 ^ total_penalty)
+        # Every penalty point reduces the CURRENT score by 2%.
+        score = 100 * (0.98 ** total_penalty)
         
         return max(0, min(100, int(score)))
