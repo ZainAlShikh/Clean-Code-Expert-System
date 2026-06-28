@@ -67,8 +67,8 @@
     <!-- Main Content -->
     <main class="content hidden" id="mainContent">
 
-        <!-- Row 1: Source + AST -->
-        <div class="row row-top anim-in">
+        <!-- Row 1: Source + AST (Hidden to match Zain's simple layout) -->
+        <div class="row row-top anim-in hidden" id="sourceAstRow">
             <section class="card card-source">
                 <div class="card-header">
                     <span class="card-icon">📄</span>
@@ -136,8 +136,25 @@
             </section>
         </div>
 
-        <!-- Row 3: Refactoring — Before/After -->
-        <section class="card card-refactor anim-in">
+        <div class="ai-trigger-container anim-in">
+            <button id="openAiModalBtn" class="btn-ai-trigger hidden">
+                ✨ Auto-Fix with AI (Gemini)
+            </button>
+        </div>
+
+    </main>
+
+    <!-- AI Refactoring Modal (Second Interface) -->
+    <div id="aiModal" class="modal hidden">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h2>✨ AI-Powered Refactoring</h2>
+                <button id="closeAiModalBtn" class="close-btn">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Row 3: Refactoring — Before/After -->
+                <section class="card card-refactor anim-in">
             <div class="card-header">
                 <span class="card-icon">✨</span>
                 <h2>AI-Powered Refactoring</h2>
@@ -164,36 +181,39 @@
             </div>
         </section>
 
-        <!-- Row 4: Re-analysis Improvement -->
-        <section class="card card-improvement hidden anim-in" id="improvementCard">
-            <div class="card-header">
-                <span class="card-icon">📈</span>
-                <h2>Improvement Analysis</h2>
-                <span class="badge-ai badge-green">Verified</span>
-            </div>
-            <div class="card-body improvement-body">
-                <div class="improvement-scores">
-                    <div class="imp-before">
-                        <span class="imp-label">Before</span>
-                        <span class="imp-score" id="impBefore">—</span>
-                    </div>
-                    <div class="imp-arrow">→</div>
-                    <div class="imp-after">
-                        <span class="imp-label">After</span>
-                        <span class="imp-score" id="impAfter">—</span>
-                    </div>
-                    <div class="imp-delta">
-                        <span class="imp-label">Improvement</span>
-                        <span class="imp-score imp-green" id="impDelta">—</span>
-                    </div>
-                </div>
-                <div class="radar-compare">
-                    <canvas id="radarCompareCanvas" width="320" height="320"></canvas>
-                </div>
-            </div>
-        </section>
+                </section>
 
-    </main>
+                <!-- Row 4: Re-analysis Improvement -->
+                <section class="card card-improvement hidden anim-in" id="improvementCard">
+                    <div class="card-header">
+                        <span class="card-icon">📈</span>
+                        <h2>Improvement Analysis</h2>
+                        <span class="badge-ai badge-green">Verified</span>
+                    </div>
+                    <div class="card-body improvement-body">
+                        <div class="improvement-scores">
+                            <div class="imp-before">
+                                <span class="imp-label">Before</span>
+                                <span class="imp-score" id="impBefore">—</span>
+                            </div>
+                            <div class="imp-arrow">→</div>
+                            <div class="imp-after">
+                                <span class="imp-label">After</span>
+                                <span class="imp-score" id="impAfter">—</span>
+                            </div>
+                            <div class="imp-delta">
+                                <span class="imp-label">Improvement</span>
+                                <span class="imp-score imp-green" id="impDelta">—</span>
+                            </div>
+                        </div>
+                        <div class="radar-compare">
+                            <canvas id="radarCompareCanvas" width="320" height="320"></canvas>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
 
     <!-- Loading Overlay -->
     <div id="loadingOverlay" class="loading-overlay hidden">

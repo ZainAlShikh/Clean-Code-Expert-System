@@ -1,19 +1,4 @@
-from core.facts import JSFunctionFact, JSVariableFact, JSIfStatementFact, JSFunctionCallFact, JSMagicNumberFact
-
-# Patterns to detect different responsibilities/concerns within a function
-CONCERN_PATTERNS = {
-    "Validation": ["validate", "check", "verify", "isValid", "assert", "ensure"],
-    "Database": ["save", "update", "delete", "insert", "query", "find", "fetch", "persist", "store", "remove"],
-    "Email": ["send_email", "sendEmail", "notify", "mail", "alert"],
-    "Reporting": ["generate_report", "generateReport", "report", "print", "log"],
-    "Dashboard": ["update_dashboard", "updateDashboard", "render", "display", "show"],
-    "Archiving": ["archive", "backup", "compress", "zip"],
-    "Audit": ["audit", "create_audit", "createAudit", "track", "record"],
-    "IO": ["read", "write", "open", "close", "load"],
-    "Authentication": ["login", "logout", "authenticate", "authorize"],
-    "Formatting": ["format", "parse", "serialize", "deserialize", "transform"],
-}
-
+from core.facts import JSFunctionFact, JSVariableFact, JSIfStatementFact, JSFunctionCallFact, JSMagicNumberFact, JSConcernFact
 
 class FactExtractor:
     """
@@ -23,6 +8,7 @@ class FactExtractor:
     def __init__(self):
         self.facts = []
         self.current_file_path = ""
+        self.function_stack = []
 
     def extract(self, ast, file_path: str) -> list:
         """
@@ -32,29 +18,6 @@ class FactExtractor:
         self._traverse(ast, current_depth=0)
         return self.facts
 
-    def get_extracted_facts_summary(self):
-        """
-        Returns a summary of extracted facts for display in the UI.
-        """
-        summary = {
-            "parameter_count": 0,
-            "nesting_depth": 0,
-            "function_calls": 0,
-            "concerns_detected": [],
-        }
-
-        functions = [f for f in self.facts if isinstance(f, JSFunctionFact)]
-        calls = [f for f in self.facts if isinstance(f, JSFunctionCallFact)]
-
-        if functions:
-            main_func = functions[0]
-            summary["parameter_count"] = main_func["param_count"]
-            summary["nesting_depth"] = main_func["nesting_depth"]
-            summary["concerns_detected"] = list(main_func["concerns_list"])
-
-        summary["function_calls"] = len(calls)
-        return summary
-
     def _traverse(self, node, current_depth=0):
         if not node or not isinstance(node, dict):
             return
@@ -63,13 +26,19 @@ class FactExtractor:
         if not node_type:
             return
 
+        # Increase depth for block statements / control structures to calculate max nesting
         child_depth = current_depth
         if node_type in ("BlockStatement", "IfStatement", "ForStatement", "WhileStatement", "DoWhileStatement", "SwitchStatement"):
             child_depth += 1
 
-        if node_type in ("FunctionDeclaration", "FunctionExpression", "ArrowFunctionExpression"):
-            self._handle_function(node)
-            child_depth = 0
+        is_func = node_type in ("FunctionDeclaration", "FunctionExpression", "ArrowFunctionExpression")
+        if is_func:
+            name = "anonymous"
+            if node.get("id"):
+                name = node["id"].get("name", "anonymous")
+            self.function_stack.append(name)
+            self._handle_function(node, name)
+            child_depth = 0 # reset depth inside function body for nesting calculation
 
         elif node_type == "VariableDeclaration":
             self._handle_variable(node)
@@ -83,6 +52,7 @@ class FactExtractor:
         elif node_type == "Literal":
             self._handle_literal(node)
 
+        # Traverse children recursively
         for key, value in node.items():
             if key in ("loc", "type", "range"):
                 continue
@@ -93,11 +63,10 @@ class FactExtractor:
             elif isinstance(value, dict):
                 self._traverse(value, current_depth=child_depth)
 
-    def _handle_function(self, node):
-        name = "anonymous"
-        if node.get("id"):
-            name = node["id"].get("name", "anonymous")
-            
+        if is_func:
+            self.function_stack.pop()
+
+    def _handle_function(self, node, name):
         start_line = 0
         line_count = 0
         if "loc" in node:
@@ -113,10 +82,6 @@ class FactExtractor:
                 params_list.append(p.get("name", ""))
         
         complexity, max_nesting = self._calculate_complexity_and_nesting(node.get("body", {}))
-        
-        # Detect concerns/responsibilities
-        call_names = self._collect_call_names(node.get("body", {}))
-        detected_concerns = self._detect_concerns(call_names)
 
         self.facts.append(JSFunctionFact(
             name=name,
@@ -126,9 +91,7 @@ class FactExtractor:
             params_list=tuple(params_list),
             start_line=start_line,
             complexity=complexity,
-            nesting_depth=max_nesting,
-            concern_count=len(detected_concerns),
-            concerns_list=tuple(detected_concerns)
+            nesting_depth=max_nesting
         ))
 
     def _handle_variable(self, node):
@@ -182,6 +145,28 @@ class FactExtractor:
                 file_path=self.current_file_path,
                 start_line=start_line
             ))
+            
+            if self.function_stack:
+                current_func = self.function_stack[-1]
+                concern = None
+                tn_lower = target_name.lower()
+                
+                # Check for concerns
+                if "validat" in tn_lower: concern = "Validation"
+                elif "save" in tn_lower or "db" in tn_lower or "query" in tn_lower or "persist" in tn_lower: concern = "Database"
+                elif "email" in tn_lower or "send" in tn_lower or "notify" in tn_lower: concern = "Email"
+                elif "report" in tn_lower or "export" in tn_lower: concern = "Reporting"
+                elif "dash" in tn_lower or "update_dash" in tn_lower: concern = "Dashboard"
+                elif "archiv" in tn_lower: concern = "Archiving"
+                elif "audit" in tn_lower or "log" in tn_lower: concern = "Audit"
+                
+                if concern:
+                    # Append concern fact
+                    self.facts.append(JSConcernFact(
+                        func_name=current_func,
+                        file_path=self.current_file_path,
+                        concern=concern
+                    ))
 
     def _handle_literal(self, node):
         val = node.get("value")
@@ -242,52 +227,26 @@ class FactExtractor:
         _count(test_node)
         return count
 
-    def _collect_call_names(self, body_node):
+    def get_extracted_facts_summary(self):
         """
-        Collects all function call names within a function body.
-        Used for concern/responsibility detection.
+        Returns a serializable summary of extracted facts for the UI Radar Chart.
         """
-        call_names = []
-        
-        def _walk(n):
-            if not n or not isinstance(n, dict):
-                return
-            if n.get("type") == "CallExpression":
-                callee = n.get("callee", {})
-                name = None
-                if callee.get("type") == "Identifier":
-                    name = callee.get("name")
-                elif callee.get("type") == "MemberExpression":
-                    prop = callee.get("property", {})
-                    if prop.get("type") == "Identifier":
-                        name = prop.get("name")
-                if name:
-                    call_names.append(name)
-            
-            for k, v in n.items():
-                if k in ("loc", "type", "range"):
-                    continue
-                if isinstance(v, list):
-                    for item in v:
-                        if isinstance(item, dict):
-                            _walk(item)
-                elif isinstance(v, dict):
-                    _walk(v)
-        
-        _walk(body_node)
-        return call_names
-
-    def _detect_concerns(self, call_names):
-        """
-        Detects different concerns/responsibilities based on function call patterns.
-        Returns a list of concern type strings.
-        """
-        detected = set()
-        for call_name in call_names:
-            call_lower = call_name.lower()
-            for concern_type, keywords in CONCERN_PATTERNS.items():
-                for keyword in keywords:
-                    if keyword.lower() in call_lower:
-                        detected.add(concern_type)
-                        break
-        return sorted(list(detected))
+        summary = {
+            "functions": [],
+            "variables": [],
+            "magic_numbers": [],
+            "concerns": []
+        }
+        for f in self.facts:
+            # We don't have direct access to the class type easily as a string without parsing, 
+            # so we'll check the attributes.
+            if hasattr(f, "complexity"):
+                summary["functions"].append({"name": f["name"], "complexity": f["complexity"], "param_count": f["param_count"], "line_count": f["line_count"], "nesting_depth": f["nesting_depth"]})
+            elif hasattr(f, "is_constant"):
+                summary["variables"].append({"name": f["name"], "scope": f["scope"]})
+            elif hasattr(f, "value"):
+                summary["magic_numbers"].append({"value": f["value"]})
+            elif hasattr(f, "concern"):
+                summary["concerns"].append({"func_name": f["func_name"], "concern": f["concern"]})
+                
+        return summary

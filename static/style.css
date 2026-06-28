@@ -472,3 +472,18 @@ body {
 
 /* ===== UTILS ===== */
 .hidden { display: none !important; }
+
+/* AI Trigger Button */
+.ai-trigger-container { display: flex; justify-content: center; margin-top: 2rem; }
+.btn-ai-trigger { background: linear-gradient(135deg, #a855f7, #6366f1); color: white; padding: 1rem 2.5rem; font-size: 1.25rem; font-weight: 600; border-radius: 50px; border: none; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4); }
+.btn-ai-trigger:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(168, 85, 247, 0.6); }
+
+/* Full Screen Modal */
+.modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 9999; display: flex; justify-content: center; align-items: center; }
+.modal.hidden { display: none; }
+.modal-content { width: 95%; height: 95%; overflow-y: auto; display: flex; flex-direction: column; padding: 2rem; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.modal-header h2 { font-size: 1.8rem; color: #fff; margin: 0; }
+.close-btn { background: none; border: none; color: #94a3b8; font-size: 2.5rem; cursor: pointer; transition: color 0.2s; line-height: 1; }
+.close-btn:hover { color: #f87171; }
+.modal-body { display: flex; flex-direction: column; gap: 1.5rem; flex-grow: 1; }

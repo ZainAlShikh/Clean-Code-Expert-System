@@ -9,6 +9,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebarActions = document.getElementById('sidebarActions');
     const reAnalyzeBtn = document.getElementById('reAnalyzeBtn');
     const exportPdfBtn = document.getElementById('exportPdfBtn');
+    
+    // AI Modal Elements
+    const openAiModalBtn = document.getElementById('openAiModalBtn');
+    const aiModal = document.getElementById('aiModal');
+    const closeAiModalBtn = document.getElementById('closeAiModalBtn');
 
     // Store last analysis data globally
     let lastData = null;
@@ -41,6 +46,11 @@ document.addEventListener('DOMContentLoaded', () => {
             sidebarStats.classList.remove('hidden');
             sidebarActions.classList.remove('hidden');
             document.getElementById('improvementCard').classList.add('hidden');
+            
+            // Show the AI trigger button if we got refactoring preview
+            if (data.refactored_preview) {
+                openAiModalBtn.classList.remove('hidden');
+            }
         } catch (err) {
             showError(err.message);
         } finally {
@@ -76,6 +86,27 @@ document.addEventListener('DOMContentLoaded', () => {
             loadingOverlay.classList.add('hidden');
         }
     });
+    
+    // AI Modal handlers
+    if (openAiModalBtn && aiModal && closeAiModalBtn) {
+        openAiModalBtn.addEventListener('click', () => {
+            aiModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        });
+        
+        closeAiModalBtn.addEventListener('click', () => {
+            aiModal.classList.add('hidden');
+            document.body.style.overflow = '';
+        });
+        
+        // Close on click outside
+        aiModal.addEventListener('click', (e) => {
+            if (e.target === aiModal) {
+                aiModal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        });
+    }
 
     // Export PDF button
     exportPdfBtn.addEventListener('click', async () => {

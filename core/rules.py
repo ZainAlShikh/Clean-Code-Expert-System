@@ -1,5 +1,5 @@
-from experta import Rule, MATCH, TEST, NOT
-from core.facts import JSFunctionFact, JSVariableFact, JSIfStatementFact, JSFunctionCallFact, JSMagicNumberFact
+from experta import Rule, MATCH, TEST, NOT, P
+from core.facts import JSFunctionFact, JSVariableFact, JSIfStatementFact, JSFunctionCallFact, JSMagicNumberFact, JSConcernFact
 from models.recommendation import RefactoringRecommendation, Severity
 
 class CleanCodeRules:
@@ -8,8 +8,7 @@ class CleanCodeRules:
     Must be mixed into a KnowledgeEngine subclass.
     """
 
-    @Rule(JSFunctionFact(line_count=MATCH.line_count, name=MATCH.name, start_line=MATCH.start_line, file_path=MATCH.file_path),
-          TEST(lambda line_count: line_count > 20))
+    @Rule(JSFunctionFact(line_count=MATCH.line_count & P(lambda lc: lc > 20), name=MATCH.name, start_line=MATCH.start_line, file_path=MATCH.file_path))
     def long_method_rule(self, name, start_line, line_count, file_path):
         self.recommendations.append(RefactoringRecommendation(
             rule_name="Long Method",
@@ -18,30 +17,19 @@ class CleanCodeRules:
             file_path=file_path,
             line_number=start_line,
             severity=Severity.HIGH,
-            suggestion="Extract Method: Identify smaller logical blocks within the function and extract them into separate helper functions.",
-            rule_id="R1",
-            condition="IF LineCount > 20",
-            violation_type="Long Method",
-            strategy="Extract Method",
-            status="FIRED"
+            suggestion="Extract Method: Identify smaller logical blocks within the function and extract them into separate helper functions."
         ))
 
-    @Rule(JSFunctionFact(param_count=MATCH.param_count, name=MATCH.name, start_line=MATCH.start_line, file_path=MATCH.file_path),
-          TEST(lambda param_count: param_count > 3))
+    @Rule(JSFunctionFact(param_count=MATCH.param_count & P(lambda pc: pc > 4), name=MATCH.name, start_line=MATCH.start_line, file_path=MATCH.file_path))
     def too_many_parameters_rule(self, name, start_line, param_count, file_path):
         self.recommendations.append(RefactoringRecommendation(
             rule_name="Too Many Parameters",
-            description=f"Function '{name}' takes {param_count} parameters. Clean Code states that a function should have 0-2 parameters, and >3 requires strong justification.",
+            description=f"Function '{name}' takes {param_count} parameters. Clean Code states that a function should have 0-2 parameters, and >4 requires strong justification.",
             target_name=name,
             file_path=file_path,
             line_number=start_line,
-            severity=Severity.HIGH, # Changed to HIGH to match image
-            suggestion="Introduce Parameter Object: Group related parameters into a single object or class.",
-            rule_id="R2",
-            condition="IF ParameterCount > 3",
-            violation_type="Too Many Parameters",
-            strategy="Introduce Parameter Object",
-            status="FIRED"
+            severity=Severity.MEDIUM,
+            suggestion="Introduce Parameter Object: Group related parameters into a single object or class."
         ))
 
     @Rule(JSVariableFact(name=MATCH.name, start_line=MATCH.start_line, file_path=MATCH.file_path),
@@ -54,12 +42,7 @@ class CleanCodeRules:
             file_path=file_path,
             line_number=start_line,
             severity=Severity.LOW,
-            suggestion="Rename Variable: Give the variable a meaningful and descriptive name that explains its intent.",
-            rule_id="R3",
-            condition="IF VariableNameLength < 3",
-            violation_type="Short Variable Name",
-            strategy="Rename Variable",
-            status="FIRED"
+            suggestion="Rename Variable: Give the variable a meaningful and descriptive name that explains its intent."
         ))
 
     @Rule(JSFunctionFact(name=MATCH.func_name, file_path=MATCH.file_path, start_line=MATCH.start_line),
@@ -73,12 +56,7 @@ class CleanCodeRules:
             file_path=file_path,
             line_number=start_line,
             severity=Severity.MEDIUM,
-            suggestion="Remove Dead Code: If the function is not part of a public API, it should be removed to keep the codebase clean.",
-            rule_id="R4",
-            condition="IF FunctionDeclared AND NOT FunctionCalled",
-            violation_type="Dead Code",
-            strategy="Remove Dead Code",
-            status="FIRED"
+            suggestion="Remove Dead Code: If the function is not part of a public API, it should be removed to keep the codebase clean."
         ))
 
     @Rule(
@@ -95,16 +73,10 @@ class CleanCodeRules:
             file_path=file_path1,
             line_number=start_line1,
             severity=Severity.MEDIUM,
-            suggestion="Extract Class / Introduce Parameter Object: Turn these parameters into an object.",
-            rule_id="R5",
-            condition="IF SameParameters >= 3 in Multiple Functions",
-            violation_type="Data Clumps",
-            strategy="Extract Class / Introduce Parameter Object",
-            status="FIRED"
+            suggestion="Extract Class / Introduce Parameter Object: Turn these parameters into an object."
         ))
 
-    @Rule(JSFunctionFact(complexity=MATCH.complexity, name=MATCH.name, start_line=MATCH.start_line, file_path=MATCH.file_path),
-          TEST(lambda complexity: complexity > 10))
+    @Rule(JSFunctionFact(complexity=MATCH.complexity & P(lambda c: c > 10), name=MATCH.name, start_line=MATCH.start_line, file_path=MATCH.file_path))
     def high_cyclomatic_complexity_rule(self, name, start_line, complexity, file_path):
         self.recommendations.append(RefactoringRecommendation(
             rule_name="High Cyclomatic Complexity",
@@ -113,16 +85,10 @@ class CleanCodeRules:
             file_path=file_path,
             line_number=start_line,
             severity=Severity.HIGH,
-            suggestion="Extract Method: Break down the complex logic into smaller, single-purpose functions.",
-            rule_id="R6",
-            condition="IF CyclomaticComplexity > 10",
-            violation_type="High Cyclomatic Complexity",
-            strategy="Extract Method",
-            status="FIRED"
+            suggestion="Extract Method: Break down the complex logic into smaller, single-purpose functions."
         ))
 
-    @Rule(JSFunctionFact(nesting_depth=MATCH.nesting_depth, name=MATCH.name, start_line=MATCH.start_line, file_path=MATCH.file_path),
-          TEST(lambda nesting_depth: nesting_depth > 3))
+    @Rule(JSFunctionFact(nesting_depth=MATCH.nesting_depth & P(lambda nd: nd > 3), name=MATCH.name, start_line=MATCH.start_line, file_path=MATCH.file_path))
     def deep_nesting_rule(self, name, start_line, nesting_depth, file_path):
         self.recommendations.append(RefactoringRecommendation(
             rule_name="Deep Nesting (Arrow Anti-Pattern)",
@@ -130,13 +96,26 @@ class CleanCodeRules:
             target_name=name,
             file_path=file_path,
             line_number=start_line,
-            severity=Severity.HIGH, # Changed to HIGH to match image
-            suggestion="Extract Method / Guard Clauses: Return early to avoid deep nesting, or extract the nested logic into a separate function.",
-            rule_id="R7",
-            condition="IF NestingDepth > 3",
-            violation_type="Deep Nesting",
-            strategy="Guard Clauses",
-            status="FIRED"
+            severity=Severity.MEDIUM,
+            suggestion="Extract Method / Guard Clauses: Return early to avoid deep nesting, or extract the nested logic into a separate function."
+        ))
+
+    @Rule(
+        JSConcernFact(func_name=MATCH.name, file_path=MATCH.file_path, concern=MATCH.c1),
+        JSConcernFact(func_name=MATCH.name, file_path=MATCH.file_path, concern=MATCH.c2),
+        JSConcernFact(func_name=MATCH.name, file_path=MATCH.file_path, concern=MATCH.c3),
+        TEST(lambda c1, c2, c3: c1 != c2 and c2 != c3 and c1 != c3),
+        JSFunctionFact(name=MATCH.name, file_path=MATCH.file_path, start_line=MATCH.start_line, complexity=MATCH.comp & P(lambda c: c > 1))
+    )
+    def multiple_responsibilities_rule(self, name, file_path, start_line, c1, c2, c3, comp):
+        self.recommendations.append(RefactoringRecommendation(
+            rule_name="Multiple Responsibilities",
+            description=f"Function '{name}' has multiple concerns detected (>2 types). It handles at least: {c1}, {c2}, {c3} and contains business logic (complexity {comp}).",
+            target_name=name,
+            file_path=file_path,
+            line_number=start_line,
+            severity=Severity.HIGH,
+            suggestion="Extract Method & Apply Single Responsibility Principle: Break down the function into smaller ones handling a single concern."
         ))
 
     @Rule(JSMagicNumberFact(value=MATCH.value, file_path=MATCH.file_path, start_line=MATCH.start_line))
@@ -148,29 +127,5 @@ class CleanCodeRules:
             file_path=file_path,
             line_number=start_line,
             severity=Severity.LOW,
-            suggestion="Replace Magic Number with Symbolic Constant: Assign the number to a well-named constant variable.",
-            rule_id="R8",
-            condition="IF UnexplainedNumericLiteral Found",
-            violation_type="Magic Number",
-            strategy="Replace Magic Number with Constant",
-            status="FIRED"
-        ))
-
-    @Rule(JSFunctionFact(name=MATCH.name, concern_count=MATCH.cc, file_path=MATCH.file_path, start_line=MATCH.start_line, concerns_list=MATCH.cl),
-          TEST(lambda cc: cc > 2))
-    def multiple_responsibilities_rule(self, name, cc, file_path, start_line, cl):
-        concerns_str = ", ".join(cl)
-        self.recommendations.append(RefactoringRecommendation(
-            rule_name="Multiple Responsibilities",
-            description=f"Function '{name}' handles {cc} different concerns ({concerns_str}).",
-            target_name=name,
-            file_path=file_path,
-            line_number=start_line,
-            severity=Severity.MEDIUM,
-            suggestion="Extract Method & Apply Single Responsibility Principle",
-            rule_id="R9",
-            condition="IF Multiple Concerns (>2 types)",
-            violation_type="Multiple Responsibilities",
-            strategy="Extract Method",
-            status="FIRED"
+            suggestion="Replace Magic Number with Symbolic Constant: Assign the number to a well-named constant variable."
         ))
