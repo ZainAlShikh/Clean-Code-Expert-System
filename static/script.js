@@ -275,16 +275,22 @@ document.addEventListener('DOMContentLoaded', () => {
         tbody.innerHTML = '';
         if (!recs) return;
         const seen = new Set();
-        recs.forEach(rec => {
-            if (seen.has(rec.rule_id)) return;
-            seen.add(rec.rule_id);
+        recs.forEach((rec, idx) => {
+            const rId = rec.rule_id || `R${idx + 1}`;
+            if (seen.has(rId)) return;
+            seen.add(rId);
+            
+            const condition = rec.condition || `Rule matched for: ${rec.target_name || 'Code Block'}`;
+            const vType = rec.violation_type || rec.rule_name || "Unknown Violation";
+            const strategy = rec.strategy || rec.suggestion || "Manual Refactoring";
+            
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><strong>${rec.rule_id}</strong></td>
-                <td>${rec.condition}</td>
+                <td><strong>${rId}</strong></td>
+                <td>${condition}</td>
                 <td><span class="fired-badge">FIRED</span></td>
-                <td>${rec.violation_type}</td>
-                <td>${rec.strategy}</td>`;
+                <td>${vType}</td>
+                <td>${strategy}</td>`;
             tbody.appendChild(tr);
         });
     }

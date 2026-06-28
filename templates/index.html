@@ -49,11 +49,8 @@
             </div>
         </div>
 
-        <!-- Export & Re-analyze buttons -->
+        <!-- Export button -->
         <div class="sidebar-actions hidden" id="sidebarActions">
-            <button id="reAnalyzeBtn" class="btn-secondary">
-                🔄 Re-Analyze Refactored
-            </button>
             <button id="exportPdfBtn" class="btn-secondary">
                 📄 Export Report
             </button>
@@ -149,7 +146,12 @@
         <div class="modal-content glass-panel">
             <div class="modal-header">
                 <h2>✨ AI-Powered Refactoring</h2>
-                <button id="closeAiModalBtn" class="close-btn">&times;</button>
+                <div style="display:flex; gap: 1rem; align-items: center;">
+                    <button id="reAnalyzeBtn" class="btn-secondary" style="margin:0;">
+                        🔄 Re-Analyze Refactored
+                    </button>
+                    <button id="closeAiModalBtn" class="close-btn">&times;</button>
+                </div>
             </div>
             
             <div class="modal-body">
