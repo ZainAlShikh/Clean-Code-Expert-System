@@ -1,3 +1,4 @@
-experta==1.9.4
-esprima==4.0.1
-Flask==3.0.3
+Flask==3.0.0
+Flask-Cors==4.0.0
+pylint==3.0.0
+radon==6.0.1

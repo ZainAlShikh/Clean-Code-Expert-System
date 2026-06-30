@@ -1,0 +1,27 @@
+{
+  "name": "clean-code-expert-system",
+  "displayName": "Clean Code Expert System",
+  "description": "AI-powered Clean Code analysis and refactoring",
+  "version": "0.0.1",
+  "publisher": "CleanCodeTeam",
+  "repository": { "type": "git", "url": "https://github.com/cleancode/cleancode" },
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Linters",
+    "Machine Learning"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "cleanCode.analyzeFile",
+        "title": "Clean Code: Analyze Current File"
+      }
+    ]
+  }
+}

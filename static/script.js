@@ -41,6 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(data.error || "Something went wrong during analysis.");
             }
 
+            // Save to sessionStorage for cross-page sharing
+            sessionStorage.setItem('lastAnalysisData', JSON.stringify(data));
+            sessionStorage.setItem('lastAnalysisPath', path);
+
             displayResults(data);
         } catch (error) {
             showError(error.message);
@@ -67,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (data.recommendations.length === 0) {
             cardsContainer.innerHTML = `
                 <div class="rec-card" style="text-align: center; color: #10b981;">
-                    <h3>🎉 Your code looks perfectly clean! No refactoring needed.</h3>
+                    <h3>Your code looks perfectly clean! No refactoring needed.</h3>
                 </div>
             `;
             resultsSection.classList.remove('hidden');
@@ -88,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fileGroup.className = 'file-group';
             
             const fileTitle = document.createElement('h3');
-            fileTitle.innerHTML = `📄 ${filePath}`;
+            fileTitle.innerHTML = `File: ${filePath}`;
             fileGroup.appendChild(fileTitle);
 
             recs.forEach(rec => {
@@ -108,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p><strong>Target:</strong> ${rec.target_name} (${lineStr})</p>
                         <p><strong>Issue:</strong> ${rec.description}</p>
                         <div class="suggestion">
-                            💡 <strong>Suggestion:</strong> ${rec.suggestion}
+                            <strong>Suggestion:</strong> ${rec.suggestion}
                         </div>
                     </div>
                 `;

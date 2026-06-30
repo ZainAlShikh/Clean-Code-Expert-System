@@ -226,3 +226,27 @@ class FactExtractor:
                     _count(v)
         _count(test_node)
         return count
+
+    def get_extracted_facts_summary(self):
+        """
+        Returns a serializable summary of extracted facts for the UI Radar Chart.
+        """
+        summary = {
+            "functions": [],
+            "variables": [],
+            "magic_numbers": [],
+            "concerns": []
+        }
+        for f in self.facts:
+            # We don't have direct access to the class type easily as a string without parsing, 
+            # so we'll check the attributes.
+            if hasattr(f, "complexity"):
+                summary["functions"].append({"name": f["name"], "complexity": f["complexity"], "param_count": f["param_count"], "line_count": f["line_count"], "nesting_depth": f["nesting_depth"]})
+            elif hasattr(f, "is_constant"):
+                summary["variables"].append({"name": f["name"], "scope": f["scope"]})
+            elif hasattr(f, "value"):
+                summary["magic_numbers"].append({"value": f["value"]})
+            elif hasattr(f, "concern"):
+                summary["concerns"].append({"func_name": f["func_name"], "concern": f["concern"]})
+                
+        return summary

@@ -105,12 +105,12 @@ class CleanCodeRules:
         JSConcernFact(func_name=MATCH.name, file_path=MATCH.file_path, concern=MATCH.c2),
         JSConcernFact(func_name=MATCH.name, file_path=MATCH.file_path, concern=MATCH.c3),
         TEST(lambda c1, c2, c3: c1 != c2 and c2 != c3 and c1 != c3),
-        JSFunctionFact(name=MATCH.name, file_path=MATCH.file_path, start_line=MATCH.start_line)
+        JSFunctionFact(name=MATCH.name, file_path=MATCH.file_path, start_line=MATCH.start_line, complexity=MATCH.comp & P(lambda c: c > 1))
     )
-    def multiple_responsibilities_rule(self, name, file_path, start_line, c1, c2, c3):
+    def multiple_responsibilities_rule(self, name, file_path, start_line, c1, c2, c3, comp):
         self.recommendations.append(RefactoringRecommendation(
             rule_name="Multiple Responsibilities",
-            description=f"Function '{name}' has multiple concerns detected (>2 types). It handles at least: {c1}, {c2}, {c3}.",
+            description=f"Function '{name}' has multiple concerns detected (>2 types). It handles at least: {c1}, {c2}, {c3} and contains business logic (complexity {comp}).",
             target_name=name,
             file_path=file_path,
             line_number=start_line,
