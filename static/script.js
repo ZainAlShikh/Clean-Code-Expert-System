@@ -7,21 +7,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultsSection = document.getElementById('resultsSection');
     const scanSummary = document.getElementById('scanSummary');
     const cardsContainer = document.getElementById('cardsContainer');
+    const aiDashboardLink = document.getElementById('aiDashboardLink');
 
     analyzeBtn.addEventListener('click', async () => {
         const path = targetPathInput.value.trim();
-        
+
         if (!path) {
             showError("Please enter a valid path.");
             return;
         }
 
-        // Reset UI
         hideError();
         resultsSection.classList.add('hidden');
         cardsContainer.innerHTML = '';
-        
-        // Show Loader
+
+        if (aiDashboardLink) {
+            aiDashboardLink.style.opacity = '0.7';
+            aiDashboardLink.style.pointerEvents = 'none';
+        }
+
         btnText.classList.add('hidden');
         btnLoader.classList.remove('hidden');
         analyzeBtn.disabled = true;
@@ -41,15 +45,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(data.error || "Something went wrong during analysis.");
             }
 
-            // Save to sessionStorage for cross-page sharing
             sessionStorage.setItem('lastAnalysisData', JSON.stringify(data));
             sessionStorage.setItem('lastAnalysisPath', path);
+
+            if (aiDashboardLink) {
+                aiDashboardLink.style.opacity = '';
+                aiDashboardLink.style.pointerEvents = '';
+                aiDashboardLink.style.background = 'var(--primary)';
+                aiDashboardLink.style.color = '#fff';
+                aiDashboardLink.style.boxShadow = '0 4px 10px rgba(99, 102, 241, 0.5)';
+                aiDashboardLink.textContent = 'View Advanced AI Results';
+            }
 
             displayResults(data);
         } catch (error) {
             showError(error.message);
+            if (aiDashboardLink) {
+                aiDashboardLink.style.opacity = '0.7';
+                aiDashboardLink.style.pointerEvents = '';
+            }
         } finally {
-            // Hide Loader
             btnText.classList.remove('hidden');
             btnLoader.classList.add('hidden');
             analyzeBtn.disabled = false;
@@ -67,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function displayResults(data) {
         scanSummary.innerHTML = `Scanned <strong>${data.files_scanned}</strong> JavaScript files. Found <strong>${data.recommendations.length}</strong> issues.`;
-        
+
         if (data.recommendations.length === 0) {
             cardsContainer.innerHTML = `
                 <div class="rec-card" style="text-align: center; color: #10b981;">
@@ -78,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Group by file path
         const grouped = data.recommendations.reduce((acc, rec) => {
             if (!acc[rec.file_path]) acc[rec.file_path] = [];
             acc[rec.file_path].push(rec);
@@ -90,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
         for (const [filePath, recs] of Object.entries(grouped)) {
             const fileGroup = document.createElement('div');
             fileGroup.className = 'file-group';
-            
+
             const fileTitle = document.createElement('h3');
             fileTitle.innerHTML = `File: ${filePath}`;
             fileGroup.appendChild(fileTitle);
@@ -116,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                 `;
-                
+
                 fileGroup.appendChild(card);
             });
 

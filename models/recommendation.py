@@ -12,21 +12,18 @@ class Severity(Enum):
 
 @dataclass
 class RefactoringRecommendation:
-    """
-    Data class representing a suggested refactoring or clean code issue.
-    """
     rule_name: str
     description: str
-    target_name: str  # Name of the function, variable, or class
-    file_path: str    # Path to the file containing the issue
+    target_name: str
+    file_path: str
     line_number: Optional[int] = None
     severity: Severity = Severity.MEDIUM
     suggestion: str = ""
-    rule_id: str = ""              # e.g., "R1", "R2"
-    condition: str = ""            # e.g., "IF ParameterCount > 3"
-    violation_type: str = ""       # e.g., "Too Many Parameters"
-    strategy: str = ""             # e.g., "Introduce Parameter Object"
-    status: str = "FIRED"          # Rule execution status
+    rule_id: str = ""
+    condition: str = ""
+    violation_type: str = ""
+    strategy: str = ""
+    status: str = "FIRED"
 
     def to_dict(self):
         return {

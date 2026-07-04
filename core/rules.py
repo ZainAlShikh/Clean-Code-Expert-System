@@ -2,11 +2,8 @@ from experta import Rule, MATCH, TEST, NOT, P
 from core.facts import JSFunctionFact, JSVariableFact, JSIfStatementFact, JSFunctionCallFact, JSMagicNumberFact, JSConcernFact
 from models.recommendation import RefactoringRecommendation, Severity
 
+
 class CleanCodeRules:
-    """
-    Mixin class containing all the Experta rules for Clean Code.
-    Must be mixed into a KnowledgeEngine subclass.
-    """
 
     @Rule(JSFunctionFact(line_count=MATCH.line_count & P(lambda lc: lc > 20), name=MATCH.name, start_line=MATCH.start_line, file_path=MATCH.file_path))
     def long_method_rule(self, name, start_line, line_count, file_path):
