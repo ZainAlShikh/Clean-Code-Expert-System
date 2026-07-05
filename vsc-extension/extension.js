@@ -1,9 +1,11 @@
 const vscode = require('vscode');
 const https = require('https');
+const http = require('http');
 const path = require('path');
-const fs = require('fs');
 
-const API_HOSTNAME = 'zainalsh.pythonanywhere.com';
+const API_HOSTNAME = '127.0.0.1';
+const API_PORT = 5000;
+const API_USE_HTTPS = false;
 
 let diagnosticCollection;
 
@@ -48,7 +50,7 @@ function analyzeFile(filePath, sourceCode) {
 
         const options = {
             hostname: API_HOSTNAME,
-            port: 443,
+            port: API_PORT,
             path: '/api/analyze',
             method: 'POST',
             headers: {
@@ -57,7 +59,8 @@ function analyzeFile(filePath, sourceCode) {
             }
         };
 
-        const req = https.request(options, (res) => {
+        const transport = API_USE_HTTPS ? https : http;
+        const req = transport.request(options, (res) => {
             let data = '';
             res.on('data', (chunk) => { data += chunk; });
             res.on('end', () => {
@@ -79,34 +82,6 @@ function analyzeFile(filePath, sourceCode) {
     });
 }
 
-function generatePdfReport(data) {
-    return new Promise((resolve, reject) => {
-        const postData = JSON.stringify(data);
-
-        const options = {
-            hostname: API_HOSTNAME,
-            port: 443,
-            path: '/api/generate-pdf',
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Content-Length': Buffer.byteLength(postData)
-            }
-        };
-
-        const req = https.request(options, (res) => {
-            let fileData = [];
-            res.on('data', (chunk) => { fileData.push(chunk); });
-            res.on('end', () => {
-                resolve(Buffer.concat(fileData));
-            });
-        });
-
-        req.on('error', (e) => reject(e));
-        req.write(postData);
-        req.end();
-    });
-}
 
 function updateDiagnostics(document, recommendations) {
     diagnosticCollection.clear();
@@ -153,21 +128,7 @@ function showDashboardWebview(context, data, editor) {
                         vscode.window.showInformationMessage('Clean Code Applied Successfully!');
                     }
                     return;
-                case 'downloadPdf':
-                    try {
-                        const fileBuffer = await generatePdfReport(data);
-                        const uri = await vscode.window.showSaveDialog({
-                            defaultUri: vscode.Uri.file('clean_code_report.txt'),
-                            filters: { 'Text Files': ['txt'], 'All Files': ['*'] }
-                        });
-                        if (uri) {
-                            fs.writeFileSync(uri.fsPath, fileBuffer);
-                            vscode.window.showInformationMessage(`Report saved to ${uri.fsPath}`);
-                        }
-                    } catch (err) {
-                        vscode.window.showErrorMessage('Failed to download report: ' + err.message);
-                    }
-                    return;
+
             }
         },
         undefined,
@@ -209,9 +170,6 @@ function getWebviewContent(data) {
             <h2>Overall Score</h2>
             <div class="score">${data.clean_code_score} / 100</div>
         </div>
-        <div>
-            <button class="btn" onclick="downloadReport()">Download Report (.txt)</button>
-        </div>
     </div>
 
     ${data.radar_data ? `
@@ -246,10 +204,6 @@ function getWebviewContent(data) {
 
         function applyCode() {
             vscode.postMessage({ command: 'applyCode' });
-        }
-
-        function downloadReport() {
-            vscode.postMessage({ command: 'downloadPdf' });
         }
 
         const radarData = ${radarDataJSON};

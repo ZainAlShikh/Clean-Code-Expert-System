@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebarStats = document.getElementById('sidebarStats');
     const sidebarActions = document.getElementById('sidebarActions');
     const reAnalyzeBtn = document.getElementById('reAnalyzeBtn');
-    const exportPdfBtn = document.getElementById('exportPdfBtn');
     
     // AI Modal Elements
     const openAiModalBtn = document.getElementById('openAiModalBtn');
@@ -55,7 +54,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderAll(data);
         mainContent.classList.remove('hidden');
         sidebarStats.classList.remove('hidden');
-        sidebarActions.classList.remove('hidden');
         document.getElementById('improvementCard').classList.add('hidden');
         
         if (data.refactored_preview) {
@@ -126,40 +124,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Export PDF button
-    exportPdfBtn.addEventListener('click', async () => {
-        if (!lastData) return;
-        try {
-            const payload = {
-                score: lastData.clean_code_score,
-                after_score: afterScore,
-                files_scanned: lastData.files_scanned,
-                issues_count: lastData.recommendations ? lastData.recommendations.length : 0,
-                recommendations: lastData.recommendations,
-                strategies: lastData.refactored_preview ? lastData.refactored_preview.applied_strategies : [],
-                source_code: lastData.source_code,
-                refactored_code: lastData.refactored_preview ? lastData.refactored_preview.refactored_code : ''
-            };
-
-            const response = await fetch('/api/generate-pdf', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) throw new Error("Report generation failed.");
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'clean_code_report.txt';
-            a.click();
-            window.URL.revokeObjectURL(url);
-        } catch (err) {
-            showError(err.message);
-        }
-    });
 
     function showError(msg) {
         errorToast.textContent = msg;

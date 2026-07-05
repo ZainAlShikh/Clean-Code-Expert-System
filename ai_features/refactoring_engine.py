@@ -73,38 +73,49 @@ class RefactoringEngine:
     def _call_gemini_api(source_code, recommendations):
         try:
             violations = []
-            for rec in recommendations:
-                violations.append(f"- {rec.rule_name}: {rec.description} (Strategy: {rec.strategy})")
+            for rec in recommendations[:30]:  # Cap at 30 most important violations
+                violations.append(f"- [{rec.severity.value}] {rec.rule_name}: {rec.description}")
             violations_text = "\n".join(violations)
+            if len(recommendations) > 30:
+                violations_text += f"\n... and {len(recommendations) - 30} more issues."
 
-            prompt = f"""You are a Clean Code refactoring expert. Analyze the following JavaScript code and rewrite it applying Clean Code principles.
+            # For large files, send only the first 300 lines to avoid truncation
+            MAX_SOURCE_LINES = 300
+            source_lines = source_code.splitlines()
+            if len(source_lines) > MAX_SOURCE_LINES:
+                trimmed_source = "\n".join(source_lines[:MAX_SOURCE_LINES])
+                source_note = f"\n[NOTE: File has {len(source_lines)} lines. Showing first {MAX_SOURCE_LINES} lines for refactoring. Apply the same principles to the rest of the file.]"
+            else:
+                trimmed_source = source_code
+                source_note = ""
 
-The following violations were detected by our expert system:
+            prompt = f"""You are a Clean Code refactoring expert. Rewrite the following JavaScript code applying Clean Code principles.
+
+Detected violations:
 {violations_text}
 
-Original Code:
+Original Code:{source_note}
 ```javascript
-{source_code}
+{trimmed_source}
 ```
 
 Instructions:
-1. Apply Guard Clauses to reduce nesting
-2. Extract methods to follow Single Responsibility Principle
-3. Use Parameter Objects if there are too many parameters
-4. Replace magic numbers with named constants
-5. Use meaningful variable names
+1. Apply Guard Clauses to reduce deep nesting
+2. Extract long methods into smaller focused helper functions
+3. Replace ALL magic numbers with named constants at the top of the file
+4. Use meaningful variable names (no single-letter names like x, y, z)
+5. Remove duplicate code
 
-CRITICAL: Return ONLY the refactored JavaScript code, no explanations.
-CRITICAL: DO NOT TRUNCATE the output. Ensure all functions are fully implemented and ALL brackets are properly closed. Output the full file!
-CRITICAL: Generate STRICTLY ECMA 5.1 compliant JavaScript. DO NOT use object destructuring, DO NOT use arrow functions, DO NOT use let/const (use var), and DO NOT use template literals. This is required for our legacy AST parser to work."""
+CRITICAL: Return ONLY the refactored JavaScript code with no explanations or markdown.
+CRITICAL: DO NOT truncate. Every function must be fully implemented with properly closed brackets."""
 
             payload = json.dumps({
                 "contents": [{
                     "parts": [{"text": prompt}]
                 }],
                 "generationConfig": {
-                    "temperature": 0.3,
-                    "maxOutputTokens": 8192
+                    "temperature": 0.2,
+                    "maxOutputTokens": 65536
                 }
             })
 

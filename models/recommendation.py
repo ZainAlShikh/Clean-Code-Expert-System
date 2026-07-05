@@ -34,9 +34,10 @@ class RefactoringRecommendation:
             "line_number": self.line_number,
             "severity": self.severity.value,
             "suggestion": self.suggestion,
-            "rule_id": self.rule_id,
-            "condition": self.condition,
-            "violation_type": self.violation_type,
-            "strategy": self.strategy,
+            "rule_id": self.rule_id or self.rule_name.replace(" ", "_").upper()[:10],
+            "condition": self.condition or f"Detected in: {self.target_name}",
+            "violation_type": self.violation_type or self.rule_name,
+            # 'strategy' in the frontend = the refactoring suggestion text
+            "strategy": self.strategy or self.suggestion,
             "status": self.status
         }
