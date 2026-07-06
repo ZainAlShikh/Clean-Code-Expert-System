@@ -6,7 +6,6 @@ from analyzer.fact_extractor import FactExtractor
 from core.engine import CleanCodeExpertSystem
 from ai_features.scoring import CleanCodeScorer
 from ai_features.refactoring_engine import RefactoringEngine
-from ai_features.ast_visualizer import ASTVisualizer
 from main import find_js_files
 
 app = Flask(__name__)
@@ -65,7 +64,7 @@ def analyze():
 
     score = CleanCodeScorer.calculate_score(recommendations, total_project_lines)
     extracted_facts = extractor.get_extracted_facts_summary()
-    ast_tree = ASTVisualizer.simplify_ast(primary_ast) if primary_ast else None
+    ast_tree = None
     refactored_preview = RefactoringEngine.generate_refactored_preview(primary_source_code, recommendations)
     radar_data = _build_radar_data(extracted_facts, recommendations)
 
@@ -119,9 +118,10 @@ def _build_radar_data(extracted_facts, recommendations):
     if not extracted_facts:
         return None
 
-    param_count = extracted_facts.get('parameter_count', 0)
-    nesting_depth = extracted_facts.get('nesting_depth', 0)
-    concerns = len(extracted_facts.get('concerns_detected', []))
+    funcs = extracted_facts.get('functions', [])
+    param_count = max([f.get('param_count', 0) for f in funcs]) if funcs else 0
+    nesting_depth = max([f.get('nesting_depth', 0) for f in funcs]) if funcs else 0
+    concerns = len(set([c.get('concern') for c in extracted_facts.get('concerns', [])]))
     issue_count = len(recommendations) if recommendations else 0
 
     naming = max(0, 100 - (sum(1 for r in recommendations if r.rule_name == "Short Variable Name") * 25)) if recommendations else 100
@@ -134,7 +134,6 @@ def _build_radar_data(extracted_facts, recommendations):
         "labels": ["Naming", "Parameters", "Nesting", "SRP", "Complexity"],
         "values": [naming, params, nesting, srp, complexity]
     }
-
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

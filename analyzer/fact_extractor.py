@@ -236,12 +236,12 @@ class FactExtractor:
             "concerns": []
         }
         for f in self.facts:
-            if hasattr(f, "complexity"):
+            if "complexity" in f:
                 summary["functions"].append({"name": f["name"], "complexity": f["complexity"], "param_count": f["param_count"], "line_count": f["line_count"], "nesting_depth": f["nesting_depth"]})
-            elif hasattr(f, "is_constant"):
+            elif "is_constant" in f:
                 summary["variables"].append({"name": f["name"], "scope": f["scope"]})
-            elif hasattr(f, "value"):
+            elif "value" in f:
                 summary["magic_numbers"].append({"value": f["value"]})
-            elif hasattr(f, "concern"):
+            elif "concern" in f:
                 summary["concerns"].append({"func_name": f["func_name"], "concern": f["concern"]})
         return summary

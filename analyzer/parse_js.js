@@ -1,4 +1,3 @@
-// parse_js.js — uses acorn (supports ES2025) to parse JS and print AST as JSON
 const acorn = require('acorn');
 
 let source = '';
@@ -15,7 +14,6 @@ process.stdin.on('end', () => {
         });
         process.stdout.write(JSON.stringify(ast));
     } catch (e) {
-        // Write error as JSON so Python can detect it
         process.stdout.write(JSON.stringify({ __parse_error__: e.message }));
     }
 });

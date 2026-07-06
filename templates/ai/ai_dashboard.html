@@ -1,147 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clean Code Advisor  Expert System</title>
+    <title>Clean Code Advisor Expert System</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='ai/ai_style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
 </head>
+
 <body>
-    <nav class="top-nav glass-panel" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; margin: 20px auto; max-width: 1200px; border-radius: 12px; z-index: 1000; width: 95%;">
-        <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-main);">CleanCode <span style="color: var(--primary);">System</span></div>
+    <nav class="top-nav glass-panel"
+        style="display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; margin: 20px auto; max-width: 1200px; border-radius: 12px; z-index: 1000; width: 95%;">
+        <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-main);">CleanCode <span
+                style="color: var(--primary);">System</span></div>
         <div style="display: flex; gap: 15px;">
-            <a href="/" style="text-decoration: none; color: var(--text-main); padding: 8px 16px; border-radius: 8px; font-weight: 500; opacity: 0.7; transition: all 0.3s ease;">Standard Analysis</a>
-            <a href="/ai-dashboard" style="text-decoration: none; padding: 8px 16px; border-radius: 8px; font-weight: 500; background: var(--primary); color: #fff; box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);">Advanced AI & Scoring</a>
+            <a href="/"
+                style="text-decoration: none; color: var(--text-main); padding: 8px 16px; border-radius: 8px; font-weight: 500; opacity: 0.7; transition: all 0.3s ease;">Standard
+                Analysis</a>
+            <a href="/ai-dashboard"
+                style="text-decoration: none; padding: 8px 16px; border-radius: 8px; font-weight: 500; background: var(--primary); color: #fff; box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);">Advanced
+                AI & Scoring</a>
         </div>
     </nav>
     <div class="app-container">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <div class="sidebar-logo">
-            <div class="logo-icon"></div>
-            <div class="logo-text">
-                <span class="brand">CleanCode</span>
-                <span class="sub">Expert System</span>
-            </div>
-        </div>
-
-        <div class="sidebar-input">
-            <label for="targetPath">Target Path</label>
-            <input type="text" id="targetPath" placeholder="e.g. tests/fixtures/sample.js" value="tests/fixtures/sample.js">
-        </div>
-
-        <button id="analyzeBtn" class="btn-analyze">
-            <span class="btn-icon"></span> Run Analysis
-        </button>
-
-        <div class="sidebar-stats hidden" id="sidebarStats">
-            <div class="stat-card">
-                <span class="stat-label">Files Scanned</span>
-                <span class="stat-value" id="filesScanned">0</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-label">Issues Found</span>
-                <span class="stat-value" id="issuesFound">0</span>
-            </div>
-            <div class="stat-card score-card">
-                <span class="stat-label">Code Quality</span>
-                <div class="score-ring">
-                    <svg viewBox="0 0 36 36">
-                        <path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                        <path class="ring-fill" id="scoreRing" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                        <text x="18" y="21" class="ring-text" id="scoreValue"></text>
-                    </svg>
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="logo-icon"></div>
+                <div class="logo-text">
+                    <span class="brand">CleanCode</span>
+                    <span class="sub">Expert System</span>
                 </div>
             </div>
-        </div>
 
+            <div class="sidebar-input">
+                <label for="targetPath">Target Path</label>
+                <input type="text" id="targetPath" placeholder="e.g. tests/fixtures/sample.js"
+                    value="tests/fixtures/sample.js">
+            </div>
 
-        <div class="sidebar-footer">
-            <small>Powered by <strong>Experta</strong> + <strong>Gemini AI</strong></small>
-        </div>
-    </aside>
+            <button id="analyzeBtn" class="btn-analyze">
+                <span class="btn-icon"></span> Run Analysis
+            </button>
 
-    <!-- Main Content -->
-    <main class="content hidden" id="mainContent">
-
-        <!-- Row 1: Source + AST (Hidden to match Zain's simple layout) -->
-        <div class="row row-top anim-in hidden" id="sourceAstRow">
-            <section class="card card-source">
-                <div class="card-header">
-                    
-                    <h2>Source Code</h2>
+            <div class="sidebar-stats hidden" id="sidebarStats">
+                <div class="stat-card">
+                    <span class="stat-label">Files Scanned</span>
+                    <span class="stat-value" id="filesScanned">0</span>
                 </div>
-                <div class="card-body code-dark">
-                    <pre><code id="sourceCodeBlock" class="language-javascript"></code></pre>
+                <div class="stat-card">
+                    <span class="stat-label">Issues Found</span>
+                    <span class="stat-value" id="issuesFound">0</span>
                 </div>
-            </section>
-
-            <section class="card card-ast">
-                <div class="card-header">
-                    
-                    <h2>AST Analysis</h2>
-                </div>
-                <div class="card-body ast-split">
-                    <div class="ast-tree" id="astVisual"></div>
-                    <div class="ast-facts">
-                        <h3>Extracted Facts</h3>
-                        <ul id="factsList"></ul>
+                <div class="stat-card score-card">
+                    <span class="stat-label">Code Quality</span>
+                    <div class="score-ring">
+                        <svg viewBox="0 0 36 36">
+                            <path class="ring-bg"
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path class="ring-fill" id="scoreRing" stroke-dasharray="0, 100"
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <text x="18" y="21" class="ring-text" id="scoreValue"></text>
+                        </svg>
                     </div>
                 </div>
-            </section>
-        </div>
+            </div>
 
-        <!-- Row 2: Problems + Rules + Radar -->
-        <div class="row row-mid anim-in">
-            <section class="card card-problems">
-                <div class="card-header">
-                    
-                    <h2>Detected Violations</h2>
-                </div>
-                <div class="card-body" id="problemsContainer"></div>
-            </section>
 
-            <section class="card card-rules">
-                <div class="card-header">
-                    <span class="card-icon"></span>
-                    <h2>Inference Engine Log</h2>
-                </div>
-                <div class="card-body">
-                    <table class="rules-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Condition</th>
-                                <th>Result</th>
-                                <th>Violation</th>
-                                <th>Strategy</th>
-                            </tr>
-                        </thead>
-                        <tbody id="ruleTableBody"></tbody>
-                    </table>
-                </div>
-            </section>
+            <div class="sidebar-footer">
+                <small>Powered by <strong>Experta</strong> + <strong>Gemini AI</strong></small>
+            </div>
+        </aside>
 
-            <section class="card card-radar">
-                <div class="card-header">
-                    
-                    <h2>Quality Radar</h2>
-                </div>
-                <div class="card-body radar-body">
-                    <canvas id="radarCanvas" width="280" height="280"></canvas>
-                </div>
-            </section>
-        </div>
+        <!-- Main Content -->
+        <main class="content hidden" id="mainContent">
 
-        <div class="ai-trigger-container anim-in">
-            <button id="openAiModalBtn" class="btn-ai-trigger hidden">
-                 Auto-Fix with AI (Gemini)
-            </button>
-        </div>
+            <!-- Row 1: Source + AST (Hidden to match Zain's simple layout) -->
+            <div class="row row-top anim-in hidden" id="sourceAstRow">
+                <section class="card card-source">
+                    <div class="card-header">
 
-    </main>
+                        <h2>Source Code</h2>
+                    </div>
+                    <div class="card-body code-dark">
+                        <pre><code id="sourceCodeBlock" class="language-javascript"></code></pre>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- Row 2: Problems + Rules + Radar -->
+            <div class="row row-mid anim-in">
+                <section class="card card-problems">
+                    <div class="card-header">
+
+                        <h2>Detected Violations</h2>
+                    </div>
+                    <div class="card-body" id="problemsContainer"></div>
+                </section>
+
+                <section class="card card-rules">
+                    <div class="card-header">
+                        <span class="card-icon"></span>
+                        <h2>Inference Engine Log</h2>
+                    </div>
+                    <div class="card-body">
+                        <table class="rules-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Condition</th>
+                                    <th>Result</th>
+                                    <th>Violation</th>
+                                    <th>Strategy</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ruleTableBody"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="card card-radar">
+                    <div class="card-header">
+
+                        <h2>Quality Radar</h2>
+                    </div>
+                    <div class="card-body radar-body">
+                        <canvas id="radarCanvas" width="280" height="280"></canvas>
+                    </div>
+                </section>
+            </div>
+
+            <div class="ai-trigger-container anim-in">
+                <button id="openAiModalBtn" class="btn-ai-trigger hidden">
+                    Auto-Fix with AI (Gemini)
+                </button>
+            </div>
+
+        </main>
     </div>
 
     <!-- AI Refactoring Modal (Second Interface) -->
@@ -151,47 +151,47 @@
                 <h2> AI-Powered Refactoring</h2>
                 <div style="display:flex; gap: 1rem; align-items: center;">
                     <button id="reAnalyzeBtn" class="btn-secondary" style="margin:0;">
-                         Re-Analyze Refactored
+                        Re-Analyze Refactored
                     </button>
                     <button id="closeAiModalBtn" class="close-btn">&times;</button>
                 </div>
             </div>
-            
+
             <div class="modal-body">
                 <!-- Row 3: Refactoring  Before/After -->
                 <section class="card card-refactor anim-in">
-            <div class="card-header">
-                
-                <h2>AI-Powered Refactoring</h2>
-                <span class="badge-ai">Gemini AI</span>
-            </div>
-            <div class="card-body refactor-split">
-                <div class="refactor-structure">
-                    <h3>Refactored Architecture</h3>
-                    <div class="struct-diagram" id="structureDiagram"></div>
-                    <div class="struct-checklist" id="refactoringChecklist"></div>
-                </div>
-                <div class="refactor-code">
-                    <div class="diff-header">
-                        <button class="diff-tab active" data-view="after"> Refactored Code</button>
-                        <button class="diff-tab" data-view="diff"> Diff View</button>
+                    <div class="card-header">
+
+                        <h2>AI-Powered Refactoring</h2>
+                        <span class="badge-ai">Gemini AI</span>
                     </div>
-                    <div class="code-dark" id="codeAfterView">
-                        <pre><code id="refactoredCodeBlock" class="language-javascript"></code></pre>
+                    <div class="card-body refactor-split">
+                        <div class="refactor-structure">
+                            <h3>Refactored Architecture</h3>
+                            <div class="struct-diagram" id="structureDiagram"></div>
+                            <div class="struct-checklist" id="refactoringChecklist"></div>
+                        </div>
+                        <div class="refactor-code">
+                            <div class="diff-header">
+                                <button class="diff-tab active" data-view="after"> Refactored Code</button>
+                                <button class="diff-tab" data-view="diff"> Diff View</button>
+                            </div>
+                            <div class="code-dark" id="codeAfterView">
+                                <pre><code id="refactoredCodeBlock" class="language-javascript"></code></pre>
+                            </div>
+                            <div class="code-dark hidden" id="codeDiffView">
+                                <pre id="diffOutput"></pre>
+                            </div>
+                        </div>
                     </div>
-                    <div class="code-dark hidden" id="codeDiffView">
-                        <pre id="diffOutput"></pre>
-                    </div>
-                </div>
-            </div>
-        </section>
+                </section>
 
                 </section>
 
                 <!-- Row 4: Re-analysis Improvement -->
                 <section class="card card-improvement hidden anim-in" id="improvementCard">
                     <div class="card-header">
-                        
+
                         <h2>Improvement Analysis</h2>
                         <span class="badge-ai badge-green">Verified</span>
                     </div>
@@ -234,5 +234,5 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsdiff/5.1.0/diff.min.js"></script>
     <script src="{{ url_for('static', filename='ai/ai_script.js') }}"></script>
 </body>
-</html>
 
+</html>

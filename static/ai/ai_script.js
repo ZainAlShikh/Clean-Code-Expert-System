@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebarStats = document.getElementById('sidebarStats');
     const sidebarActions = document.getElementById('sidebarActions');
     const reAnalyzeBtn = document.getElementById('reAnalyzeBtn');
-    
+
     // AI Modal Elements
     const openAiModalBtn = document.getElementById('openAiModalBtn');
     const aiModal = document.getElementById('aiModal');
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
         mainContent.classList.remove('hidden');
         sidebarStats.classList.remove('hidden');
         document.getElementById('improvementCard').classList.add('hidden');
-        
+
         if (data.refactored_preview) {
             openAiModalBtn.classList.remove('hidden');
         }
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Auto-load from sessionStorage
     const savedData = sessionStorage.getItem('lastAnalysisData');
     const savedPath = sessionStorage.getItem('lastAnalysisPath');
-    
+
     if (savedData && savedPath) {
         targetPathInput.value = savedPath;
         try {
@@ -102,19 +102,19 @@ document.addEventListener('DOMContentLoaded', () => {
             loadingOverlay.classList.add('hidden');
         }
     });
-    
+
     // AI Modal handlers
     if (openAiModalBtn && aiModal && closeAiModalBtn) {
         openAiModalBtn.addEventListener('click', () => {
             aiModal.classList.remove('hidden');
             document.body.style.overflow = 'hidden'; // Prevent background scrolling
         });
-        
+
         closeAiModalBtn.addEventListener('click', () => {
             aiModal.classList.add('hidden');
             document.body.style.overflow = '';
         });
-        
+
         // Close on click outside
         aiModal.addEventListener('click', (e) => {
             if (e.target === aiModal) {
@@ -137,9 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('issuesFound').textContent = data.recommendations ? data.recommendations.length : 0;
         renderScore(data.clean_code_score);
 
-        // Sections
         renderSourceCode(data.source_code);
-        renderAST(data.ast_tree);
         renderFacts(data.extracted_facts);
         renderProblems(data.recommendations);
         renderRuleTable(data.recommendations);
@@ -173,42 +171,10 @@ document.addEventListener('DOMContentLoaded', () => {
         Prism.highlightElement(el);
     }
 
-    function renderAST(tree) {
-        const astVisual = document.getElementById('astVisual');
-        astVisual.innerHTML = '';
-        if (!tree) { astVisual.innerHTML = '<div style="color:var(--text-muted)">No AST</div>'; return; }
-
-        function build(nodeData, container) {
-            if (!nodeData) return;
-            const el = document.createElement('div');
-            el.className = 'ast-node';
-            if (nodeData.name === 'Module') el.classList.add('n-module');
-            else if (nodeData.name.includes('FunctionDef')) el.classList.add('n-func');
-            else if (nodeData.name.includes('arguments')) el.classList.add('n-args');
-            else if (nodeData.name === 'body') el.classList.add('n-body');
-            el.textContent = nodeData.name;
-            container.appendChild(el);
-
-            if (nodeData.children && nodeData.children.length > 0) {
-                const kids = document.createElement('div');
-                kids.className = 'ast-children';
-                const limit = Math.min(nodeData.children.length, 5);
-                for (let i = 0; i < limit; i++) build(nodeData.children[i], kids);
-                if (nodeData.children.length > 5) {
-                    const more = document.createElement('div');
-                    more.className = 'ast-node';
-                    more.style.opacity = '0.4';
-                    more.textContent = `... +${nodeData.children.length - 5} more`;
-                    kids.appendChild(more);
-                }
-                container.appendChild(kids);
-            }
-        }
-        build(tree, astVisual);
-    }
 
     function renderFacts(facts) {
         const factsList = document.getElementById('factsList');
+        if (!factsList) return;
         factsList.innerHTML = '';
         if (!facts) return;
         const items = [
@@ -261,11 +227,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const rId = rec.rule_id || `R${idx + 1}`;
             if (seen.has(rId)) return;
             seen.add(rId);
-            
+
             const condition = rec.condition || `Rule matched for: ${rec.target_name || 'Code Block'}`;
             const vType = rec.violation_type || rec.rule_name || "Unknown Violation";
             const strategy = rec.strategy || rec.suggestion || "Manual Refactoring";
-            
+
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><strong>${rId}</strong></td>

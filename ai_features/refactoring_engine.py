@@ -5,7 +5,7 @@ import urllib.error
 
 class RefactoringEngine:
 
-    GEMINI_API_KEY = "AIzaSyDB9OYS45Cd4Vs_WXrB6k_kqihAKg-qiCw"
+    GEMINI_API_KEY = "AQ.Ab8RN6JtP3255V4p6-vDX5XcnudG3B4gUsO_qC8qDp4G8qbl1g"
     GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-robotics-er-1.6-preview:generateContent?key={GEMINI_API_KEY}"
 
     @staticmethod
@@ -20,47 +20,15 @@ class RefactoringEngine:
         applied_strategies = list(set([rec.strategy for rec in recommendations]))
 
         primary_func = "main_process"
-        for rec in recommendations:
-            if rec.rule_name in ["Long Method", "Too Many Parameters", "Dead Code (Project-Wide)",
-                                 "High Cyclomatic Complexity", "Deep Nesting (Arrow Anti-Pattern)",
-                                 "Multiple Responsibilities", "Data Clumps"]:
-                if rec.target_name and rec.target_name != "unknown":
-                    primary_func = rec.target_name
-                    break
 
         refactored_code = RefactoringEngine._call_gemini_api(source_code, recommendations)
 
         if not refactored_code:
-            refactored_code = RefactoringEngine._generate_template(primary_func)
+            return None
 
         structure_preview = {
             "root": f"{primary_func}()",
             "extracted": []
-        }
-
-        try:
-            import re
-            functions = []
-            func_matches = re.findall(r'function\s+([a-zA-Z0-9_]+)\s*\(', refactored_code)
-            functions.extend(func_matches)
-            arrow_matches = re.findall(r'(?:const|let|var)\s+([a-zA-Z0-9_]+)\s*=\s*(?:async\s+)?\(.*?\)\s*=>', refactored_code)
-            functions.extend(arrow_matches)
-
-            seen = set()
-            functions = [x for x in functions if not (x in seen or seen.add(x))]
-
-            if functions:
-                structure_preview["root"] = f"{functions[0]}()"
-                structure_preview["extracted"] = [f"{f}()" for f in functions[1:4]]
-        except Exception as e:
-            print(f"[RefactoringEngine] Could not parse AI code for structure: {e}")
-            structure_preview = {
-                "root": f"{primary_func}()",
-                "extracted": [
-                    f"validate_{primary_func}()",
-                    f"execute_{primary_func}()",
-                    f"finalize_{primary_func}()"
-                ]
             }
 
         return {
@@ -72,15 +40,16 @@ class RefactoringEngine:
     @staticmethod
     def _call_gemini_api(source_code, recommendations):
         try:
+            severity_weight = {"High": 3, "Medium": 2, "Low": 1}
+            sorted_recs = sorted(recommendations, key=lambda r: severity_weight.get(r.severity.value, 0), reverse=True)
             violations = []
-            for rec in recommendations[:30]:  # Cap at 30 most important violations
+            for rec in sorted_recs[:30]:  
                 violations.append(f"- [{rec.severity.value}] {rec.rule_name}: {rec.description}")
             violations_text = "\n".join(violations)
             if len(recommendations) > 30:
                 violations_text += f"\n... and {len(recommendations) - 30} more issues."
 
-            # For large files, send only the first 300 lines to avoid truncation
-            MAX_SOURCE_LINES = 300
+            MAX_SOURCE_LINES = 1000
             source_lines = source_code.splitlines()
             if len(source_lines) > MAX_SOURCE_LINES:
                 trimmed_source = "\n".join(source_lines[:MAX_SOURCE_LINES])
@@ -89,25 +58,7 @@ class RefactoringEngine:
                 trimmed_source = source_code
                 source_note = ""
 
-            prompt = f"""You are a Clean Code refactoring expert. Rewrite the following JavaScript code applying Clean Code principles.
-
-Detected violations:
-{violations_text}
-
-Original Code:{source_note}
-```javascript
-{trimmed_source}
-```
-
-Instructions:
-1. Apply Guard Clauses to reduce deep nesting
-2. Extract long methods into smaller focused helper functions
-3. Replace ALL magic numbers with named constants at the top of the file
-4. Use meaningful variable names (no single-letter names like x, y, z)
-5. Remove duplicate code
-
-CRITICAL: Return ONLY the refactored JavaScript code with no explanations or markdown.
-CRITICAL: DO NOT truncate. Every function must be fully implemented with properly closed brackets."""
+            prompt = f
 
             payload = json.dumps({
                 "contents": [{
@@ -146,22 +97,3 @@ CRITICAL: DO NOT truncate. Every function must be fully implemented with properl
             if hasattr(e, 'read'):
                 print(f"[RefactoringEngine] Error details: {e.read().decode()}")
             return None
-
-    @staticmethod
-    def _generate_template(primary_func):
-        return f"""function {primary_func}(requestObj) {{
-    if (!requestObj || !requestObj.isValid) return;
-
-    validate_{primary_func}(requestObj);
-    execute_{primary_func}(requestObj);
-    finalize_{primary_func}(requestObj);
-}}
-
-function validate_{primary_func}(data) {{
-}}
-
-function execute_{primary_func}(data) {{
-}}
-
-function finalize_{primary_func}(data) {{
-}}"""

@@ -27,7 +27,7 @@ function activate(context) {
         }
 
         const filePath = document.fileName;
-        vscode.window.showInformationMessage(`Analyzing: ${path.basename(filePath)} via Cloud API...`);
+        vscode.window.showInformationMessage(`Analyzing: ${path.basename(filePath)} via API...`);
 
         try {
             const data = await analyzeFile(filePath, document.getText());
@@ -244,6 +244,6 @@ function getWebviewContent(data) {
 </html>`;
 }
 
-function deactivate() {}
+function deactivate() { }
 
 module.exports = { activate, deactivate };
