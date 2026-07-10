@@ -58,7 +58,22 @@ class RefactoringEngine:
                 trimmed_source = source_code
                 source_note = ""
 
-            prompt = f
+            prompt = f"""You are a Clean Code refactoring expert. Rewrite the following JavaScript code applying Clean Code principles.
+
+            Detected violations:
+            {violations_text}
+
+            Original Code:{source_note}
+            {trimmed_source}
+            Instructions:
+            1. Apply Guard Clauses to reduce deep nesting
+            2. Extract long methods into smaller focused helper functions
+            3. Replace ALL magic numbers with named constants at the top of the file
+            4. Use meaningful variable names (no single-letter names like x, y, z)
+            5. Remove duplicate code
+
+            CRITICAL: Return ONLY the refactored JavaScript code with no explanations or markdown.
+            CRITICAL: DO NOT truncate. Every function must be fully implemented with properly closed brackets."""
 
             payload = json.dumps({
                 "contents": [{
